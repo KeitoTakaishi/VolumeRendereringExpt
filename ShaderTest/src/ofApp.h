@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
+#include "transformMatrix.hpp"
 
 class ofApp : public ofBaseApp{
 
@@ -32,7 +33,10 @@ class ofApp : public ofBaseApp{
     ofxPanel gui;
     ofxVec3Slider scale;
     ofxVec3Slider translate;
-    
+    ofxVec2Slider skewX;
+    ofxVec2Slider skewY;
+    ofxVec2Slider skewZ;
+    ofxFloatSlider delta;
 
     ofEasyCam cam;
 };
