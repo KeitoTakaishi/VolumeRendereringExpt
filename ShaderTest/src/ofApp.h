@@ -30,13 +30,23 @@ class ofApp : public ofBaseApp{
     ofMatrix4x4 modelMatrix;
     
     //Gui
-    ofxPanel gui;
+    ofxPanel modelMatrixGui;
     ofxVec3Slider scale;
     ofxVec3Slider translate;
     ofxVec2Slider skewX;
     ofxVec2Slider skewY;
     ofxVec2Slider skewZ;
     ofxFloatSlider delta;
+    
+    ofxPanel viewMatrixGui;
+    ofxVec3Slider eyePos;
+    ofxVec3Slider eyeTarget;
+    
+    ofxFloatSlider fov;
+    ofxFloatSlider near;
+    ofxFloatSlider far;
+    
+    
 
     ofEasyCam cam;
 };

@@ -12,8 +12,13 @@
 #include "ofMain.h"
 
 class transformMatrix{
+public:
     transformMatrix();
-    ofMatrix4x4* getViewMatrix(ofVec3f eye, ofVec3f target, ofVec3f up);
+    static ofMatrix4x4 getViewMatrix(ofVec3f eye, ofVec3f target, ofVec3f up);
+    static ofMatrix4x4 getProjMatrix(float theta, float far, float near);
+    
+    
+    
     
 };
 #endif /* transformMatrix_hpp */
