@@ -2,6 +2,8 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    ofImage img;
+    img.load(".");
     ofSetFrameRate(60);
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
     
@@ -59,8 +61,12 @@ void ofApp::setup(){
     
     gui.setup("Bounding-Box");
     gui.add(aabb_size.setup("Boundgin Size", ofVec3f(256,256,256), ofVec3f(0, 0, 0), ofVec3f(3000,3000,3000)));
-    gui.add(wrapMode.setup("wrapMode", 0, 0, 2));
-    createTexture3d();
+    gui.add(wrapMode.setup("WRAP_MODE", 0, 0, 2));
+    gui.add(minFilterMode.setup("MAG_FILTER_MODE", 0, 0, 1));
+    gui.add(magFilterMode.setup("MIN_FILTER_MODE", 0, 0, 1));
+    
+    //boundingBox->createTexture3D(ofVec3f(255,255,10));
+    boundingBox->fileLoader("tex.jpg");
 }
 
 //--------------------------------------------------------------
@@ -71,9 +77,6 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofBackground(50);
-    ofDisableDepthTest();
-    glDisable(GL_TEXTURE_3D);
-    gui.draw();
     boundingBox->setSize(ofVec3f(aabb_size->x, aabb_size->y, aabb_size->z));
     ofEnableDepthTest();
     glEnable(GL_TEXTURE_3D);
@@ -84,7 +87,7 @@ void ofApp::draw(){
     ofDrawAxis(2000.0);
     shader.begin();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D , texID);
+    glBindTexture(GL_TEXTURE_3D , *(boundingBox->getTexID()));
     
     if(wrapMode==0){
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
@@ -99,6 +102,19 @@ void ofApp::draw(){
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
     }
+    if(minFilterMode == 0){
+        glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    }else{
+        glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    }
+    
+    if(magFilterMode == 0){
+        glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    }else{
+        glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    }
+    
+    
     shader.setUniform1f("volume_tex", 0);
     shader.setUniform1f("u_time", ofGetElapsedTimef());
     boundingBox->drawCube();
@@ -121,7 +137,9 @@ void ofApp::draw(){
                        "Filter mode (l/n): " + (linearFilter?"linear":"nearest"),20,20);
     */
     
-    
+    ofDisableDepthTest();
+    glDisable(GL_TEXTURE_3D);
+    gui.draw();
 }
 
 //--------------------------------------------------------------
@@ -180,36 +198,3 @@ void ofApp::keyPressed(int key){
 }
 
 //--------------------------------------------------------------
-void ofApp::createTexture3d(){
-    unsigned char pixels[255*255*10*4];
-    ofVec3f size = ofVec3f(255, 255, 10);
-    for(int z = 0; z < size.z; z++){
-        for(int y = 0; y < size.y; y++){
-            for(int x = 0; x < size.x; x++){
-                int index = (x+y*size.x+z*size.x*size.y)*4;
-                pixels[index] = x;
-                pixels[index+1] = y;
-                pixels[index+2] = z*255.0/10.0;
-                pixels[index+3] = 255.0;
-            }
-        }
-    }
-    
-    glEnable(GL_TEXTURE_3D);
-    glActiveTexture(GL_TEXTURE0);
-    glGenTextures(1, &texID);
-    glBindTexture(GL_TEXTURE_3D , texID);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    
-    
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, size.x, size.y, size.z,
-                 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    
-    glDisable(GL_TEXTURE_3D);
-}

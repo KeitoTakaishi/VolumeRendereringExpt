@@ -84,6 +84,7 @@ BoundingBox::BoundingBox(ofVec3f size){
 
 void BoundingBox::setSize(ofVec3f size){
     ofVec3f texScale = ofVec3f(1.0*size.x/255.0, 1.0*size.y/255.0, 1.0*size.z/255.0);
+   
     
     /* Front side */
     volVerts[0] = ofVec3f(size.x, size.y, size.z);
@@ -157,6 +158,84 @@ void BoundingBox::setSize(ofVec3f size){
 
 }
 
+
+void BoundingBox::fileLoader(string path){
+//    int startFrame = 0;
+//    int curFrame = 0;
+    //ofDisableArbTex();
+    img.load(path);
+    ofVec3f size = ofVec3f(img.getWidth(), img.getHeight(), 1);
+    cout << "image size : " << size << endl;
+    int num = size.x*size.y*size.z*4;
+    pixels = new unsigned char[num];
+    for(int z = 0; z < size.z; z++){
+        for(int y = 0; y < size.y; y++){
+            for(int x = 0; x < size.x; x++){
+                int index = (x+y*size.x+z*size.x*size.y)*4;
+                pixels[index] = img.getPixels()[x+y*size.x];
+                pixels[index+1] = img.getPixels()[x+y*size.x];
+                pixels[index+2] = img.getPixels()[x+y*size.x];
+                pixels[index+3] = 255.0;
+            }
+        }
+    }
+    
+    glEnable(GL_TEXTURE_3D);
+    glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_3D , texID);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    
+    
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+    
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, size.x, size.y, size.z,
+                 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    
+    glDisable(GL_TEXTURE_3D);
+    
+    
+}
+
+
+void BoundingBox::createTexture3D(ofVec3f texSize){
+    int num = texSize.x*texSize.y*texSize.z*4;
+    pixels = new unsigned char[num];
+    ofVec3f size = texSize;
+    for(int z = 0; z < size.z; z++){
+        for(int y = 0; y < size.y; y++){
+            for(int x = 0; x < size.x; x++){
+                int index = (x+y*size.x+z*size.x*size.y)*4;
+                pixels[index] = x;
+                pixels[index+1] = y;
+                pixels[index+2] = z*255.0/10.0;
+                pixels[index+3] = 255.0;
+            }
+        }
+    }
+    
+    glEnable(GL_TEXTURE_3D);
+    glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_3D , texID);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    
+    
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+    
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, size.x, size.y, size.z,
+                 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    
+    glDisable(GL_TEXTURE_3D);
+}
 void BoundingBox::drawCube(){
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -173,3 +252,6 @@ void BoundingBox::drawCube(){
 };
 
 
+GLuint* BoundingBox::getTexID(){
+    return &(this->texID);
+}

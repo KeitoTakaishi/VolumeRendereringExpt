@@ -5,6 +5,8 @@
 //  Created by takaishi keito on 2019/08/13.
 //
 
+//texture3d viewer
+
 #ifndef BoundingBox_hpp
 #define BoundingBox_hpp
 
@@ -15,10 +17,19 @@ public:
     BoundingBox();
     BoundingBox(ofVec3f size);
     
+    void fileLoader(string path);
+    void createTexture3D(ofVec3f texSize);
+    
     ofVec3f volVerts[24];
     ofVec3f texVerts[24];
     void setSize(ofVec3f size);
     void drawCube();
+    
+    GLuint* getTexID();
+private:
+    unsigned char *pixels;
+    ofImage img;
+    GLuint texID;
 };
 
 #endif /* BoundingBox_hpp */

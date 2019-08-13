@@ -10,11 +10,9 @@ class ofApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
-
 		void keyPressed(int key);
 		
     
-    void createTexture3d();
 		
     ofEasyCam cam;
 
@@ -29,9 +27,10 @@ class ofApp : public ofBaseApp{
     ofxPanel gui;
     ofxVec3Slider aabb_size;
     ofxIntSlider wrapMode;
+    ofxIntSlider magFilterMode;
+    ofxIntSlider minFilterMode;
+    
     
     BoundingBox *boundingBox;
     ofShader shader;
-    GLuint texID;
-    
 };
