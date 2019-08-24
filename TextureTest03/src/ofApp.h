@@ -29,8 +29,16 @@ class ofApp : public ofBaseApp{
     ofxIntSlider wrapMode;
     ofxIntSlider magFilterMode;
     ofxIntSlider minFilterMode;
+    ofxFloatSlider _intencity;
+    ofxFloatSlider _threshould;
+    ofxFloatSlider _brendRate;
+    ofxIntSlider _iterration;
+    ofxVec3Slider _offSet;
+    ofxVec3Slider _imageSize;
     
     
     BoundingBox *boundingBox;
+    ofVec3f boundingBoxSize = ofVec3f(256.0);
     ofShader shader;
+    
 };

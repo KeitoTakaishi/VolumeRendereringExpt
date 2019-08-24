@@ -2,105 +2,74 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofImage img;
-    img.load(".");
-    ofSetFrameRate(60);
+    //ofSetFrameRate(60);
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-    
-    /*
-    imageSequence.init("volumes/head/cthead-8bit",3,".tif", 1);
-    volWidth = imageSequence.getWidth();
-    volHeight = imageSequence.getHeight();
-    volDepth = imageSequence.getSequenceLength();
-    
-    cout << "setting up volume data buffer at " << volWidth << "x" << volHeight << "x" << volDepth <<"\n";
-    
-    //initでfileをopenして何枚画像データがあるか確認
-    volumeData = new unsigned char[volWidth*volHeight*volDepth*4];
-    
-    
-    //1フレームロードしてピクセルデータを取得
-    for(int z=0; z<volDepth; z++)
-    {
-        imageSequence.loadFrame(z);
-        for(int x=0; x<volWidth; x++)
-        {
-            for(int y=0; y<volHeight; y++)
-            {
-                // convert from greyscale to RGBA, false color
-                int i4 = ((x+volWidth*y)+z*volWidth*volHeight)*4;//index
-                int sample = imageSequence.getPixels()[x+y*volWidth];//輝度値
-                ofColor c;
-                c.setHsb(sample, 255-sample, sample);
-                volumeData[i4] = c.r;
-                volumeData[i4+1] = c.g;
-                volumeData[i4+2] = c.b;
-                volumeData[i4+3] = sample;
-            }
-        }
-    }
-    
-    myVolume.setup(volWidth, volHeight, volDepth, ofVec3f(1,1,2),false);
-    //texture allocate
-    myVolume.updateVolumeData(volumeData,volWidth,volHeight,volDepth,0,0,0);
-    //texture(load)
-    
-    myVolume.setRenderSettings(1.0, 0.75, 0.75, 0.1);
-    
-    */
-    
     
     cam.setDistance(1000);
     cam.enableMouseInput();
     
-    ofVec3f size = ofVec3f(256.0);
-    boundingBox = new BoundingBox(size);
-    shader.load("Shaders/shader.vert", "Shaders/shader1.frag");
     
+    boundingBox = new BoundingBox(boundingBoxSize);
+    //shader.load("Shaders/_shader");
+    shader.load("Shaders/_shader.vert", "Shaders/shader1.frag");
     
-    
-    gui.setup("Bounding-Box");
+    gui.setup("VolumeRender-Expt");
     gui.add(aabb_size.setup("Boundgin Size", ofVec3f(256,256,256), ofVec3f(0, 0, 0), ofVec3f(3000,3000,3000)));
     gui.add(wrapMode.setup("WRAP_MODE", 0, 0, 2));
     gui.add(minFilterMode.setup("MAG_FILTER_MODE", 0, 0, 1));
     gui.add(magFilterMode.setup("MIN_FILTER_MODE", 0, 0, 1));
+    gui.add(_intencity.setup("_Intencity", 0.5, 0.0, 1.0));
+    //gui.add(_threshould.setup("_Threshould", 0.2, 0.0, 1.0));
+    gui.add(_threshould.setup("_Threshould", 0.08, 0.0, 0.2));
+    gui.add(_brendRate.setup("_BrendRate", 0.5, 0.0, 1.0));
+    gui.add(_iterration.setup("_Iteration", 5, 1, 30));
+    gui.add(_offSet.setup("_OffSet", ofVec3f(0.0, 0.0, 0.0), ofVec3f(0.0, 0.0, 0.0), ofVec3f(1.0, 1.0, 1.0)));
+    gui.add(_imageSize.setup("_ImageSize", ofVec3f(256.0, 256.0, 256.0), ofVec3f(0.0, 0.0, 0.0), ofVec3f(256.0, 256.0, 256.0)));
+    
     
     //boundingBox->createTexture3D(ofVec3f(255,255,10));
-    boundingBox->fileLoader("tex.jpg");
+    boundingBox->fileLoader("volumes/head", "cthead-8bit", ".tif", 99);
+    
+    cam.setPosition(0.0/2.0, 0.0/2.0, 1000.0);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
+    boundingBox->setSizeCenter(ofVec3f(aabb_size->x, aabb_size->y, aabb_size->z));
+    ofSetWindowTitle(to_string(ofGetFrameRate()));
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    ofBackground(50);
-    boundingBox->setSize(ofVec3f(aabb_size->x, aabb_size->y, aabb_size->z));
-    ofEnableDepthTest();
-    glEnable(GL_TEXTURE_3D);
-    
-
-    
+    ofBackground(30);
     cam.begin();
-    ofDrawAxis(2000.0);
+    ofEnableDepthTest();
+
+    //ray viewe
+    ofSetLineWidth(3.0);
+    ofSetColor(0.0, 200.0, 180.0);
+    //ofDrawLine(ofVec3f(cam.getPosition()+ofVec3f(-300)), ofVec3f(aabb_size));
+    //ofDrawLine(co.x*0.5, co.y*0.5, co.z*0.5, 0.0, 0.0, 0.0);
+    
+    
+    //ofDrawAxis(2000.0);
+    
     shader.begin();
+    glEnable(GL_TEXTURE_3D);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_3D , *(boundingBox->getTexID()));
-    
     if(wrapMode==0){
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-    }else if(wrapMode == 1){
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    }else if(wrapMode == 2){
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    }else if(wrapMode == 1){
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+    }else if(wrapMode == 2){
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
     }
     if(minFilterMode == 0){
         glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -117,12 +86,41 @@ void ofApp::draw(){
     
     shader.setUniform1f("volume_tex", 0);
     shader.setUniform1f("u_time", ofGetElapsedTimef());
+    shader.setUniform3f("cameraPos", cam.getPosition());
+    shader.setUniform3f("boundingSize", ofVec3f(aabb_size));
+    
+    shader.setUniform1f("_Intensity", _intencity);
+    shader.setUniform1f("_Threshould", _threshould);
+    shader.setUniform1f("_BlendRate", _brendRate);
+    shader.setUniform1i("_Iteration", _iterration);
+    shader.setUniform3f("_OffSet", _offSet);
+    shader.setUniform3f("_ImageSize", _imageSize);
+    
+    
+    ofMatrix4x4 modelMatrix;
+    //modelMatrix.rotate(ofGetFrameNum()*0.4, 1.0, 1.0, 1.0);
+    
+    shader.setUniformMatrix4f("model", modelMatrix);
+    shader.setUniformMatrix4f("invModel", modelMatrix.getInverse());
+    ofMatrix4x4 viewMatrix;
+    viewMatrix = ofGetCurrentViewMatrix();
+    //cout << "---------"<< endl;
+    //cout << viewMatrix << endl;
+    shader.setUniformMatrix4f("view", viewMatrix);
+    ofMatrix4x4 modeViewInvMatrix;
+    modeViewInvMatrix = modelMatrix;
+    modeViewInvMatrix.postMult(viewMatrix);
+    shader.setUniformMatrix4f("modelViewInv", modeViewInvMatrix);
+    ofMatrix4x4 projectionMatrix;
+    projectionMatrix = cam.getProjectionMatrix();
+    shader.setUniformMatrix4f("projection", projectionMatrix);
+    
     boundingBox->drawCube();
     shader.end();
+    
     //myVolume.drawVolume(0,0,0, ofGetHeight(), 0);
+    
     cam.end();
-    
-    
     
     /*
     ofSetColor(0,0,0,255);
@@ -140,6 +138,7 @@ void ofApp::draw(){
     ofDisableDepthTest();
     glDisable(GL_TEXTURE_3D);
     gui.draw();
+    ofSetColor(255);
 }
 
 //--------------------------------------------------------------
@@ -147,7 +146,11 @@ void ofApp::keyPressed(int key){
     switch(key)
     {
         case ' ':
-            shader.load("Shaders/shader.vert", "Shaders/shader1.frag");
+            //shader.load("Shaders/_shader");
+            shader.load("Shaders/_shader.vert", "Shaders/shader1.frag");
+            break;
+        case 's':
+            shader.load("Shaders/_shader.vert", "Shaders/shader_AABB.frag");
             break;
         case 't':
             myVolume.setThreshold(myVolume.getThreshold()-0.01);

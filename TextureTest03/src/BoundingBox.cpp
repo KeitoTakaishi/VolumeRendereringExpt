@@ -83,7 +83,7 @@ BoundingBox::BoundingBox(ofVec3f size){
 }
 
 void BoundingBox::setSize(ofVec3f size){
-    ofVec3f texScale = ofVec3f(1.0*size.x/255.0, 1.0*size.y/255.0, 1.0*size.z/255.0);
+    ofVec3f texScale = ofVec3f(size.x/256.0, size.y/256.0, size.z/256.0);
    
     
     /* Front side */
@@ -158,21 +158,107 @@ void BoundingBox::setSize(ofVec3f size){
 
 }
 
+void BoundingBox::setSizeCenter(ofVec3f size){
+    ofVec3f texScale = ofVec3f(size.x/256.0, size.y/256.0, size.z/256.0);
+    
+    
+    /* Front side */
+    volVerts[0] = ofVec3f(size.x/2.0, size.y/2.0, size.z/2.0);
+    volVerts[1] = ofVec3f(-size.x/2.0, size.y/2.0, size.z/2.0);
+    volVerts[2] = ofVec3f(-size.x/2.0, -size.y/2.0, size.z/2.0);
+    volVerts[3] = ofVec3f(size.x/2.0, -size.y/2.0, size.z/2.0);
+    
+    texVerts[0] = ofVec3f(texScale.x, texScale.y, texScale.z);
+    texVerts[1] = ofVec3f(0.0, texScale.y, texScale.z);
+    texVerts[2] = ofVec3f(0.0, 0.0, texScale.z);
+    texVerts[3] = ofVec3f(texScale.x, 0.0, texScale.z);
+    
+    
+    /* Right side */
+    volVerts[4] = ofVec3f(size.x/2.0,   size.y/2.0,       size.z/2.0);
+    volVerts[5] = ofVec3f(size.x/2.0,   -1.0*size.y/2.0,  size.z/2.0);
+    volVerts[6] = ofVec3f(size.x/2.0,   -1.0*size.y/2.0,  -1.0*size.z/2.0);
+    volVerts[7] = ofVec3f(size.x/2.0,   size.y/2.0,       -1.0*size.z/2.0);
+    
+    texVerts[4] = ofVec3f(texScale.x, texScale.y, texScale.z);
+    texVerts[5] = ofVec3f(texScale.x, 0.0, texScale.z);
+    texVerts[6] = ofVec3f(texScale.x, 0.0, 0.0);
+    texVerts[7] = ofVec3f(texScale.x, texScale.y, 0.0);
+    
+    
+    
+    /* Top side */
+    volVerts[8] = ofVec3f(size.x/2.0,       size.y/2.0, size.z/2.0);
+    volVerts[9] = ofVec3f(size.x/2.0,       size.y/2.0, -1.0*size.z/2.0);
+    volVerts[10] = ofVec3f(-1.0*size.x/2.0, size.y/2.0, -1.0*size.z/2.0);
+    volVerts[11] = ofVec3f(-1.0*size.x/2.0, size.y/2.0, size.z/2.0);
+    
+    texVerts[8] = ofVec3f(texScale.x, texScale.y, texScale.z);
+    texVerts[9] = ofVec3f(texScale.x, texScale.y, 0.0);
+    texVerts[10] = ofVec3f(0.0, texScale.y, 0.0);
+    texVerts[11] = ofVec3f(0.0, texScale.y, texScale.z);
+    
+    /* Left side */
+    volVerts[12] = ofVec3f(-1.0*size.x/2.0, size.y/2.0,     size.z/2.0);
+    volVerts[13] = ofVec3f(-1.0*size.x/2.0, size.y/2.0,     -1.0*size.z/2.0);
+    volVerts[14] = ofVec3f(-1.0*size.x/2.0, -1.0*size.y/2.0, -1.0*size.z/2.0);
+    volVerts[15] = ofVec3f(-1.0*size.x/2.0, -1.0*size.y/2.0, size.z/2.0);
+    
+    texVerts[12] = ofVec3f(0.0, texScale.y, texScale.z);
+    texVerts[13] = ofVec3f(0.0, texScale.y, 0.0);
+    texVerts[14] = ofVec3f(0.0, 0.0, 0.0);
+    texVerts[15] = ofVec3f(0.0, 0.0, texScale.z);
+    
+    
+    /* Bottom side */
+    volVerts[16] = ofVec3f(-1.0*size.x/2.0, -1.0*size.y/2.0, -1.0*size.z/2.0);
+    volVerts[17] = ofVec3f(size.x/2.0,      -1.0*size.y/2.0, -1.0*size.z/2.0);
+    volVerts[18] = ofVec3f(size.x/2.0,      -1.0*size.y/2.0, size.z/2.0);
+    volVerts[19] = ofVec3f(-1.0*size.x/2.0, -1.0*size.y/2.0, size.z/2.0);
+    
+    texVerts[16] = ofVec3f(0.0, 0.0, 0.0);
+    texVerts[17] = ofVec3f(texScale.x, 0.0, 0.0);
+    texVerts[18] = ofVec3f(texScale.x, 0.0, texScale.z);
+    texVerts[19] = ofVec3f(0.0, 0.0, texScale.z);
+    
+    /* Back side */
+    volVerts[20] = ofVec3f(size.x/2.0,          -1.0*size.y/2.0,    -1.0*size.z/2.0);
+    volVerts[21] = ofVec3f(-1.0*size.x/2.0,     -1.0*size.y/2.0,    -1.0*size.z/2.0);
+    volVerts[22] = ofVec3f(-1.0*size.x/2.0,     size.y/2.0,         -1.0*size.z/2.0);
+    volVerts[23] = ofVec3f(size.x/2.0,          size.y/2.0,         -1.0*size.z/2.0);
+    
+    texVerts[20] = ofVec3f(texScale.x, 0.0, 0.0);
+    texVerts[21] = ofVec3f(0.0, 0.0, 0.0);
+    texVerts[22] = ofVec3f(0.0, texScale.y, 0.0);
+    texVerts[23] = ofVec3f(texScale.x, texScale.y, 0.0);
+    
+}
 
-void BoundingBox::fileLoader(string path){
-//    int startFrame = 0;
-//    int curFrame = 0;
+
+void BoundingBox::fileLoader(string path, string prefix, string extension, int fileNum){
     //ofDisableArbTex();
-    img.load(path);
-    ofVec3f size = ofVec3f(img.getWidth(), img.getHeight(), 1);
-    cout << "image size : " << size << endl;
+    string filePath, indexStr;
+    img.load("volumes/head/cthead-8bit001.tif");
+    ofVec3f size = ofVec3f(img.getWidth(), img.getHeight(), fileNum);
+    //cout << "image size : " << size << endl;
     int num = size.x*size.y*size.z*4;
     pixels = new unsigned char[num];
     for(int z = 0; z < size.z; z++){
+        if(z < 9){
+            indexStr = "00" + to_string(z+1);
+        }else{
+            indexStr = "0" + to_string(z+1);
+        }
+        filePath = path + "/" + prefix + indexStr + extension;
+        //cout << "filePath : " << filePath << endl;
+        bool isLoad = img.load(filePath);
+        //cout << isLoad << endl;
+        
         for(int y = 0; y < size.y; y++){
             for(int x = 0; x < size.x; x++){
                 int index = (x+y*size.x+z*size.x*size.y)*4;
                 pixels[index] = img.getPixels()[x+y*size.x];
+                //cout << pixels[index] << endl;
                 pixels[index+1] = img.getPixels()[x+y*size.x];
                 pixels[index+2] = img.getPixels()[x+y*size.x];
                 pixels[index+3] = 255.0;
@@ -211,7 +297,7 @@ void BoundingBox::createTexture3D(ofVec3f texSize){
             for(int x = 0; x < size.x; x++){
                 int index = (x+y*size.x+z*size.x*size.y)*4;
                 pixels[index] = x;
-                pixels[index+1] = y;
+                pixels[index+1] = 0.0;
                 pixels[index+2] = z*255.0/10.0;
                 pixels[index+3] = 255.0;
             }
