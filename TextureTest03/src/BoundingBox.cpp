@@ -57,7 +57,7 @@ BoundingBox::BoundingBox(ofVec3f size){
     texVerts[13] = ofVec3f(0.0, texVert, 0.0);
     texVerts[14] = ofVec3f(0.0, 0.0, 0.0);
     texVerts[15] = ofVec3f(0.0, 0.0, texVert);
-
+    
     /* Bottom side */
     volVerts[16] = ofVec3f(0.0, 0.0, 0.0);
     volVerts[17] = ofVec3f(size.x, 0.0, 0.0);
@@ -68,7 +68,7 @@ BoundingBox::BoundingBox(ofVec3f size){
     texVerts[17] = ofVec3f(texVert, 0.0, 0.0);
     texVerts[18] = ofVec3f(texVert, 0.0, texVert);
     texVerts[19] = ofVec3f(0.0, 0.0, texVert);
-
+    
     
     /* Back side */
     volVerts[20] = ofVec3f(size.x, 0.0, 0.0);
@@ -82,9 +82,10 @@ BoundingBox::BoundingBox(ofVec3f size){
     texVerts[23] = ofVec3f(texVert, texVert, 0.0);
 }
 
-void BoundingBox::setSize(ofVec3f size){
-    ofVec3f texScale = ofVec3f(size.x/256.0, size.y/256.0, size.z/256.0);
-   
+void BoundingBox::setSize(ofVec3f size, ofVec3f texRes){
+    //ofVec3f texScale = ofVec3f(size.x/texRes.x, size.y/texRes.y, size.z/texRes.z);
+    ofVec3f texScale = ofVec3f(1.0, 1.0, 1.0);
+    cout << size << endl;
     
     /* Front side */
     volVerts[0] = ofVec3f(size.x, size.y, size.z);
@@ -109,7 +110,7 @@ void BoundingBox::setSize(ofVec3f size){
     texVerts[6] = ofVec3f(texScale.x, 0.0, 0.0);
     texVerts[7] = ofVec3f(texScale.x, texScale.y, 0.0);
     
-
+    
     
     /* Top side */
     volVerts[8] = ofVec3f(size.x, size.y, size.z);
@@ -133,7 +134,7 @@ void BoundingBox::setSize(ofVec3f size){
     texVerts[14] = ofVec3f(0.0, 0.0, 0.0);
     texVerts[15] = ofVec3f(0.0, 0.0, texScale.z);
     
-  
+    
     /* Bottom side */
     volVerts[16] = ofVec3f(0.0, 0.0, 0.0);
     volVerts[17] = ofVec3f(size.x, 0.0, 0.0);
@@ -155,11 +156,11 @@ void BoundingBox::setSize(ofVec3f size){
     texVerts[21] = ofVec3f(0.0, 0.0, 0.0);
     texVerts[22] = ofVec3f(0.0, texScale.y, 0.0);
     texVerts[23] = ofVec3f(texScale.x, texScale.y, 0.0);
-
+    
 }
 
-void BoundingBox::setSizeCenter(ofVec3f size){
-    ofVec3f texScale = ofVec3f(size.x/256.0, size.y/256.0, size.z/256.0);
+void BoundingBox::setSizeCenter(ofVec3f size, ofVec3f texRes){
+    ofVec3f texScale = ofVec3f(size.x/texRes.x, size.y/texRes.y, size.z/texRes.z);
     
     
     /* Front side */
@@ -256,7 +257,7 @@ void BoundingBox::fileLoader(string path, string prefix, string extension, int f
         
         for(int y = 0; y < size.y; y++){
             for(int x = 0; x < size.x; x++){
-                int index = (x+y*size.x+z*size.x*size.y)*4;
+                int index = (x + y*size.x + z*size.x*size.y )*4;
                 pixels[index] = img.getPixels()[x+y*size.x];
                 //cout << pixels[index] << endl;
                 pixels[index+1] = img.getPixels()[x+y*size.x];
@@ -274,32 +275,57 @@ void BoundingBox::fileLoader(string path, string prefix, string extension, int f
     glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
     
-    
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
     
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, size.x, size.y, size.z,
                  0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, size.x, size.y, size.z,
+                 0, GL_RGBA, GL_UNSIGNED_INT, pixels);
     
     glDisable(GL_TEXTURE_3D);
     
-    
 }
 
+unsigned char* BoundingBox::binaryFileLoader(string path, ofVec3f texRes, int ch){
+    std::ifstream fs(path.c_str(), std::ios::binary);
+    if(fs.fail()){
+        cout << "failed load file" << endl;
+    }
+    
+    int pixleNum = texRes.x * texRes.y * texRes.z * ch;
+    unsigned char *pixle = new unsigned char [pixleNum];
+    fs.read((char*)pixle,sizeof(double)*pixleNum);
+    cout << "-------Load Done--------" << endl;
+    return pixle;
+}
 
-void BoundingBox::createTexture3D(ofVec3f texSize){
-    int num = texSize.x*texSize.y*texSize.z*4;
+void BoundingBox::pixelStreamLoader(unsigned char *p, ofVec3f texSize, int ch){
+    int num = texSize.x * texSize.y * texSize.z * 4;
     pixels = new unsigned char[num];
-    ofVec3f size = texSize;
-    for(int z = 0; z < size.z; z++){
-        for(int y = 0; y < size.y; y++){
-            for(int x = 0; x < size.x; x++){
-                int index = (x+y*size.x+z*size.x*size.y)*4;
-                pixels[index] = x;
-                pixels[index+1] = 0.0;
-                pixels[index+2] = z*255.0/10.0;
-                pixels[index+3] = 255.0;
+    
+    for(int z = 0; z < texSize.z; z++){
+        for(int y = 0; y < texSize.y; y++){
+            for(int x = 0; x <texSize.x; x++){
+                int index = (x+y*texSize.x+z*texSize.x*texSize.y);
+                int _index = (x+y*texSize.x+z*texSize.x*texSize.y)*4;
+                if(ch == 1){
+                    pixels[_index] = p[index];
+                    pixels[_index+1] = p[index];
+                    pixels[_index+2] = p[index];
+                    pixels[_index+3] = 255;
+                }else if(ch == 3){
+                    pixels[_index] = p[index];
+                    pixels[_index+1] = p[index+1];
+                    pixels[_index+2] = p[index+2];
+                    pixels[_index+3] = 255;
+                }else if(ch == 4){
+                    pixels[_index] = p[index];
+                    pixels[_index+1] = p[index+1];
+                    pixels[_index+2] = p[index+2];
+                    pixels[_index+3] = p[index+3];
+                }
             }
         }
     }
@@ -317,12 +343,51 @@ void BoundingBox::createTexture3D(ofVec3f texSize){
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
     
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, size.x, size.y, size.z,
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, texSize.x, texSize.y, texSize.z,
                  0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     
     glDisable(GL_TEXTURE_3D);
 }
+
+void BoundingBox::createTexture3D(ofVec3f texSize){
+    int num = texSize.x*texSize.y*texSize.z*4;
+    pixels = new unsigned char[num];
+    ofVec3f res = texSize;
+    for(int z = 0; z < res.z; z++){
+        for(int y = 0; y < res.y; y++){
+            for(int x = 0; x < res.x; x++){
+                int index = (x+y*res.x+z*res.x*res.y)*4;
+                pixels[index] = x*255.0/(texSize.x-1.0);
+                //pixels[index+1] = 0.0;
+                pixels[index+1] = y*255.0/(texSize.y-1.0);
+                pixels[index+2] = z;
+                pixels[index+3] = 255.0;
+            }
+        }
+    }
+    
+    glEnable(GL_TEXTURE_3D);
+    glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_3D , texID);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    
+    
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, texSize.x, texSize.y, texSize.z,
+                 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    
+    glDisable(GL_TEXTURE_3D);
+}
+
+
 void BoundingBox::drawCube(){
+    glEnable(GL_DEPTH_TEST);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     //glEnableClientState(GL_COLOR_ARRAY);
@@ -341,3 +406,4 @@ void BoundingBox::drawCube(){
 GLuint* BoundingBox::getTexID(){
     return &(this->texID);
 }
+

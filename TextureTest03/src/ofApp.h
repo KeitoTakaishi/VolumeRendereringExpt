@@ -39,6 +39,9 @@ class ofApp : public ofBaseApp{
     
     BoundingBox *boundingBox;
     ofVec3f boundingBoxSize = ofVec3f(256.0);
+    ofVec3f texRes = ofVec3f(256);
     ofShader shader;
+    //unsigned char* pixel;
+    unsigned char* pixel;
     
 };

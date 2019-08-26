@@ -12,6 +12,7 @@
 
 #include <ofMain.h>
 #include <dirent.h>
+#include <fstream>
 
 class BoundingBox{
 public:
@@ -21,10 +22,15 @@ public:
     void fileLoader(string path, string prefix, string extensionm, int fileNum);
     void createTexture3D(ofVec3f texSize);
     
+    
+    
+    unsigned char* binaryFileLoader(string path, ofVec3f texRes, int ch);//BinaryFileから画素情報を取得
+    void pixelStreamLoader(unsigned char *p, ofVec3f texSize, int ch);
+    
     ofVec3f volVerts[24];
     ofVec3f texVerts[24];
-    void setSize(ofVec3f size);
-    void setSizeCenter(ofVec3f size);
+    void setSize(ofVec3f size, ofVec3f texRes);
+    void setSizeCenter(ofVec3f size, ofVec3f texRes);
     void drawCube();
     
     GLuint* getTexID();
@@ -35,3 +41,4 @@ private:
 };
 
 #endif /* BoundingBox_hpp */
+

@@ -11,7 +11,7 @@ void ofApp::setup(){
     
     boundingBox = new BoundingBox(boundingBoxSize);
     //shader.load("Shaders/_shader");
-    shader.load("Shaders/_shader.vert", "Shaders/shader1.frag");
+    shader.load("Shaders/_shader.vert", "Shaders/shader_AABB.frag");
     
     gui.setup("VolumeRender-Expt");
     gui.add(aabb_size.setup("Boundgin Size", ofVec3f(256,256,256), ofVec3f(0, 0, 0), ofVec3f(3000,3000,3000)));
@@ -27,15 +27,28 @@ void ofApp::setup(){
     gui.add(_imageSize.setup("_ImageSize", ofVec3f(256.0, 256.0, 256.0), ofVec3f(0.0, 0.0, 0.0), ofVec3f(256.0, 256.0, 256.0)));
     
     
+    /*-------Debug Mode*/
     //boundingBox->createTexture3D(ofVec3f(255,255,10));
-    boundingBox->fileLoader("volumes/head", "cthead-8bit", ".tif", 99);
     
+    /*-------sequence jpeg file*/
+    //boundingBox->fileLoader("volumes/head", "cthead-8bit", ".tif", 99);
+    
+    /*-------binary file loader*/
+    
+    texRes = ofVec3f(32, 32, 32);
+    int ch = 4;
+    boundingBox->setSizeCenter(ofVec3f(256.0), ofVec3f(256));
+    string path = "../../../data/Bucky.32x32x32.raw";
+    //string path = "../../../data/brain128x128x58.raw";
+    pixel = boundingBox->binaryFileLoader(path, texRes, ch);
+    boundingBox->pixelStreamLoader(pixel, texRes, ch);
     cam.setPosition(0.0/2.0, 0.0/2.0, 1000.0);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    boundingBox->setSizeCenter(ofVec3f(aabb_size->x, aabb_size->y, aabb_size->z));
+    
+    boundingBox->setSizeCenter(ofVec3f(aabb_size->x, aabb_size->y, aabb_size->z), texRes);
     ofSetWindowTitle(to_string(ofGetFrameRate()));
 }
 

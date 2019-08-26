@@ -24,23 +24,23 @@ struct Ray
     float tmax;
 };
 
-bool intersection(inout Ray ray)
+void intersection(inout Ray ray)
 {
     vec3 invDir = 1.0 / ray.dir;
     vec3 t1 = (-0.5 - ray.from) * invDir;
     vec3 t2 = (+0.5 - ray.from) * invDir;
 
     //input
-    vec3 tmin3 = min(t1, t2);
-    vec2 tmin2 = max(tmin3.xx, tmin3.yz);
-    ray.tmin = max(tmin2.x, tmin2.y);
+    // vec3 tmin3 = min(t1, t2);
+    // vec2 tmin2 = max(tmin3.xx, tmin3.yz);
+    // ray.tmin = max(tmin2.x, tmin2.y);
 
     //out
     vec3 tmax3 = max(t1, t2);
     vec2 tmax2 = min(tmax3.xx, tmax3.yz);
     ray.tmax = min(tmax2.x, tmax2.y);
 
-    return ray.tmax >= ray.tmin;
+    //return ray.tmax >= ray.tmin;
 }
 
 void main(){
@@ -60,7 +60,7 @@ void main(){
   for (int i = 0; i < _Iteration; ++i)
     {
         if(outColor.a > 1.0)break;
-        outColor += (1.0 - outColor.a) * texture3D(volume_tex, vec3(localPos + 0.5) + vec3(0.0, 0.0, u_time*0.5)) * _Intensity;
+        outColor += (1.0 - outColor.a) * texture3D(volume_tex, vec3(localPos + 0.5) + vec3(0.0, u_time*0.5, 0.0)) * _Intensity;
         localPos += localStep;
     }
     if(length(outColor.r) < _Threshould){
